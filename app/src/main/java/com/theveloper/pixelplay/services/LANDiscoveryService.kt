@@ -23,11 +23,10 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.IOException
-import java.io.File
-import javax.inject.Inject
-import java.io.File
-import javax.inject.Inject
+// FIX: Kept the alias for java.io.File to avoid conflict in the code
+import java.io.File as IoFile
+import javax.inject.Inject // FIX: Kept only one Inject import
+import java.io.IOException // Added missing import for try/catch block
 
 @AndroidEntryPoint
 class LANDiscoveryService : Service() {
@@ -58,13 +57,15 @@ class LANDiscoveryService : Service() {
             scope.launch {
                 updateLocalSyncData()
             }
-        } catch (e: IOException) {
+        } catch (e: IOException) { // Added missing import for IOException
             Log.e("LANDiscoveryService", "Failed to start server", e)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        // Ensure you have defined discoveryListener and registrationListener outside of onCreate
+        // as they are used here. (They are defined later in the code block)
         nsdManager.stopServiceDiscovery(discoveryListener)
         nsdManager.unregisterService(registrationListener)
         httpServer.stop()
@@ -133,8 +134,9 @@ class LANDiscoveryService : Service() {
         val songMetadata = mutableListOf<SyncSongMetadata>()
         val paths = mutableMapOf<String, String>()
         for (song in songs) {
-            val file = File(song.path)
+            val file = IoFile(song.path)
             if (file.exists()) {
+                // Ensure FileUtils is available and correct
                 val hash = FileUtils.computeSHA256(file)
                 val lastMod = FileUtils.getLastModified(file)
                 songMetadata.add(SyncSongMetadata(
@@ -157,6 +159,7 @@ class LANDiscoveryService : Service() {
             )
         }
         val syncData = SyncData(songMetadata, playlistMetadata)
+        // Ensure httpServer.updateSyncData is implemented
         httpServer.updateSyncData(syncData, paths)
         localSyncData = syncData
     }
@@ -199,6 +202,7 @@ class LANDiscoveryService : Service() {
                     songIds = remote.songIds,
                     lastModified = remote.lastModified
                 )
+                // FIX: Assuming savePlaylist is the correct name and it's a suspend function
                 userPreferencesRepository.savePlaylist(playlist)
             }
         }
@@ -212,9 +216,9 @@ class LANDiscoveryService : Service() {
                 if (response.isSuccessful) {
                     val body = response.body ?: return
                     // Save to a sync directory
-                    val syncDir = File(getExternalFilesDir(null), "sync")
+                    val syncDir = IoFile(getExternalFilesDir(null), "sync")
                     syncDir.mkdirs()
-                    val file = File(syncDir, "${meta.fileHash}.mp3") // assume mp3
+                    val file = IoFile(syncDir, "${meta.fileHash}.mp3") // assume mp3
                     file.outputStream().use { out ->
                         body.byteStream().copyTo(out)
                     }

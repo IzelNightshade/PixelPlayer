@@ -4,7 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+// Icons.Filled.KeyboardArrowLeft is correctly imported via Icons.Filled
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,6 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.theveloper.pixelplay.data.model.Song
 import com.theveloper.pixelplay.presentation.viewmodel.FamilyLibraryViewModel
 
+// FIX: Added the OptIn annotation to resolve the experimental API warning for TopAppBar/Scaffold
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FamilyLibraryScreen(
     onSongClick: (Song) -> Unit,
@@ -31,7 +34,8 @@ fun FamilyLibraryScreen(
                 title = { Text("Family Library") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        // Using KeyboardArrowLeft which is correctly imported
+                        Icon(Icons.Filled.KeyboardArrowLeft, contentDescription = "Back")
                     }
                 }
             )
