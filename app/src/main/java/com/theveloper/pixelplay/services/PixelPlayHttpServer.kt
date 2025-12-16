@@ -13,9 +13,7 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 class PixelPlayHttpServer(
-    private val context: Context,
-    private val musicDao: MusicDao,
-    port: Int = 8080
+    private val context: Context
 ) : NanoHTTPD(port) {
 
     private var syncDataJson: String = "{}"

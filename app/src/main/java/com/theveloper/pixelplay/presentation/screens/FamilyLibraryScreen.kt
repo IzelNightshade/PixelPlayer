@@ -9,17 +9,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import com.theveloper.pixelplay.data.model.Song
 import com.theveloper.pixelplay.presentation.viewmodel.FamilyLibraryViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FamilyLibraryScreen(
     onSongClick: (Song) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val viewModel: FamilyLibraryViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val viewModel = remember { FamilyLibraryViewModel(context) }
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(

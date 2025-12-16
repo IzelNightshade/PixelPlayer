@@ -7,7 +7,7 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.IBinder
 import android.util.Log
-import com.theveloper.pixelplay.data.model.SyncData
+import com.theveloper.pixelplay.data.repository.MusicRepository
 import com.theveloper.pixelplay.data.model.SyncPlaylistMetadata
 import com.theveloper.pixelplay.data.preferences.UserPreferencesRepository
 import com.theveloper.pixelplay.utils.FileUtils
@@ -27,7 +27,7 @@ import javax.inject.Inject
 class LANDiscoveryService : Service() {
 
     @Inject
-    lateinit var musicDao: MusicDao
+    lateinit var musicRepository: MusicRepository
 
     @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository
@@ -44,7 +44,7 @@ class LANDiscoveryService : Service() {
     override fun onCreate() {
         super.onCreate()
         nsdManager = getSystemService(Context.NSD_SERVICE) as NsdManager
-        httpServer = PixelPlayHttpServer(this, musicDao)
+        httpServer = PixelPlayHttpServer(this)
         try {
             httpServer.start()
             registerService()
@@ -123,7 +123,7 @@ class LANDiscoveryService : Service() {
     }
 
     private suspend fun updateLocalSyncData() {
-        val songs = musicDao.getSongs(emptyList(), false).first()
+        val songs = musicRepository.getAudioFiles().first()
         val songMetadata = mutableListOf<SyncSongMetadata>()
         val paths = mutableMapOf<String, String>()
         for (song in songs) {

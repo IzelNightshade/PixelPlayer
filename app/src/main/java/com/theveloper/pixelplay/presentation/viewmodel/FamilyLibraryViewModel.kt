@@ -1,23 +1,18 @@
 package com.theveloper.pixelplay.presentation.viewmodel
 
-import android.content.Context
+import com.theveloper.pixelplay.data.model.Song
+import androidx.lifecycle.ViewModel
 import com.theveloper.pixelplay.services.LANDiscoveryService
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class FamilyLibraryUiState(
     val familySongs: List<Song> = emptyList(),
     val isLoading: Boolean = false
 )
 
-@HiltViewModel
-class FamilyLibraryViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
-) : ViewModel() {
+class FamilyLibraryViewModel(private val context: Context) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FamilyLibraryUiState())
     val uiState: StateFlow<FamilyLibraryUiState> = _uiState.asStateFlow()
