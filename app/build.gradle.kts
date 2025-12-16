@@ -247,6 +247,9 @@ dependencies {
     implementation(libs.accompanist.drawablepainter)
     implementation(kotlin("test"))
 
+    // NanoHTTPD for HTTP server
+    implementation(libs.nanohttpd)
+
     // Android Auto
     implementation(libs.androidx.media)
     implementation(libs.androidx.app)

@@ -35,7 +35,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Button
@@ -260,6 +260,21 @@ fun LibraryScreen(
                     )
                 },
                 actions = {
+                    FilledIconButton(
+                        modifier = Modifier.padding(end = 14.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        onClick = {
+                            navController.navigate(Screen.FamilyLibrary.route)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Group,
+                            contentDescription = "Family Library"
+                        )
+                    }
                     FilledIconButton(
                         modifier = Modifier.padding(end = 14.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(

@@ -36,4 +36,6 @@ sealed class Screen(val route: String) {
 
     object About : Screen("about")
 
+    object FamilyLibrary : Screen("family_library")
+
 }

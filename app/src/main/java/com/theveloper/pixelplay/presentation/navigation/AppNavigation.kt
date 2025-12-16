@@ -31,6 +31,7 @@ import com.theveloper.pixelplay.presentation.screens.MashupScreen
 import com.theveloper.pixelplay.presentation.screens.NavBarCornerRadiusScreen
 import com.theveloper.pixelplay.presentation.screens.PlaylistDetailScreen
 import com.theveloper.pixelplay.presentation.screens.AboutScreen
+import com.theveloper.pixelplay.presentation.screens.FamilyLibraryScreen
 import com.theveloper.pixelplay.presentation.screens.SearchScreen
 import com.theveloper.pixelplay.presentation.screens.StatsScreen
 import com.theveloper.pixelplay.presentation.screens.SettingsScreen
@@ -240,6 +241,20 @@ fun AppNavigation(
                 AboutScreen(
                     navController = navController,
                     onNavigationIconClick = { navController.popBackStack() }
+                )
+            }
+            composable(
+                Screen.FamilyLibrary.route,
+                enterTransition = { enterTransition() },
+                exitTransition = { exitTransition() },
+                popEnterTransition = { enterTransition() },
+                popExitTransition = { exitTransition() },
+            ) {
+                FamilyLibraryScreen(
+                    onSongClick = { song ->
+                        // Handle song click, perhaps play
+                    },
+                    onBackClick = { navController.popBackStack() }
                 )
             }
         }
