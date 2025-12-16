@@ -5,13 +5,13 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey // Added import
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.theveloper.pixelplay.data.model.Playlist
-import com.theveloper.pixelplay.data.model.SortOption // Added import
+import com.theveloper.pixelplay.data.model.SortOption
 import com.theveloper.pixelplay.data.model.Song
 import com.theveloper.pixelplay.data.model.TransitionSettings
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -231,6 +231,24 @@ class UserPreferencesRepository @Inject constructor(
         }
     }
 
+    /**
+     * Finds and replaces a single existing playlist by its ID, or adds it if it doesn't exist.
+     * This function resolves the 'Unresolved reference: savePlaylist' error in LANDiscoveryService.
+     */
+    suspend fun savePlaylist(playlist: Playlist) {
+        val currentPlaylists = userPlaylistsFlow.first().toMutableList()
+        val index = currentPlaylists.indexOfFirst { it.id == playlist.id }
+
+        if (index != -1) {
+            // Playlist exists, replace it (update)
+            currentPlaylists[index] = playlist
+        } else {
+            // Playlist doesn't exist, add it
+            currentPlaylists.add(playlist)
+        }
+        savePlaylists(currentPlaylists)
+    }
+
     suspend fun createPlaylist(
         name: String,
         songIds: List<String> = emptyList(),
@@ -304,6 +322,7 @@ class UserPreferencesRepository @Inject constructor(
         // removing from playlist if not in playlistIds
         currentPlaylists.forEach { playlist ->
             if (playlist.songIds.contains(songId) && !playlistIds.contains(playlist.id)){
+                // Call a function that saves the changes for efficiency
                 removeSongFromPlaylist(playlist.id, songId)
                 removedPlaylistIds.add(playlist.id)
             }
@@ -463,7 +482,10 @@ class UserPreferencesRepository @Inject constructor(
 
     suspend fun setAlbumsSortOption(optionKey: String) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ARTISTS_SORT_OPTION] = optionKey
+            // FIX: This seems to point to ARTISTS_SORT_OPTION, which might be a typo in your original code. 
+            // I am keeping the original mapping but flagging it. If you want to set the ALBUMS sort option, 
+            // you should use PreferencesKeys.ALBUMS_SORT_OPTION.
+            preferences[PreferencesKeys.ARTISTS_SORT_OPTION] = optionKey 
         }
     }
 
@@ -495,10 +517,10 @@ class UserPreferencesRepository @Inject constructor(
                 SortOption.SongTitleAZ
             )
             val shouldForceSongDefault = !songsMigrated && (
-                    rawSongSort.isNullOrBlank() ||
-                            rawSongSort == SortOption.SongTitleZA.storageKey ||
-                            rawSongSort == SortOption.SongTitleZA.displayName
-                    )
+                rawSongSort.isNullOrBlank() ||
+                rawSongSort == SortOption.SongTitleZA.storageKey ||
+                rawSongSort == SortOption.SongTitleZA.displayName
+            )
 
             preferences[PreferencesKeys.SONGS_SORT_OPTION] = if (shouldForceSongDefault) {
                 SortOption.SongTitleAZ.storageKey
