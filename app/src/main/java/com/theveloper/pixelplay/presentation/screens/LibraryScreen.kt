@@ -359,7 +359,7 @@ fun LibraryScreen(
                         onClick = { showReorderTabsSheet = true }
                     ) {
                         Icon(
-                            Icons.Default.Edit,
+                            Icons.Filled.Edit,
                             contentDescription = "Reorder tabs",
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
                         )

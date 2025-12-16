@@ -14,7 +14,7 @@ import java.io.File
 
 class PixelPlayHttpServer(
     private val context: Context
-) : NanoHTTPD(port) {
+) : NanoHTTPD(8080) {
 
     private var syncDataJson: String = "{}"
     private val fileMap = mutableMapOf<String, String>() // id to path

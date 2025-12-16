@@ -7,10 +7,14 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.IBinder
 import android.util.Log
-import com.theveloper.pixelplay.data.repository.MusicRepository
+import com.theveloper.pixelplay.data.model.Playlist
+import com.theveloper.pixelplay.data.model.SyncData
 import com.theveloper.pixelplay.data.model.SyncPlaylistMetadata
+import com.theveloper.pixelplay.data.model.SyncSongMetadata
 import com.theveloper.pixelplay.data.preferences.UserPreferencesRepository
+import com.theveloper.pixelplay.data.repository.MusicRepository
 import com.theveloper.pixelplay.utils.FileUtils
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +24,8 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
+import java.io.File
+import javax.inject.Inject
 import java.io.File
 import javax.inject.Inject
 
@@ -36,7 +42,7 @@ class LANDiscoveryService : Service() {
     private lateinit var httpServer: PixelPlayHttpServer
     private val client = OkHttpClient()
     private val scope = CoroutineScope(Dispatchers.IO)
-    private var localSyncData = SyncData(emptyList(), emptyList())
+    private var localSyncData = SyncData(emptyList<SyncSongMetadata>(), emptyList<SyncPlaylistMetadata>())
 
     private val SERVICE_TYPE = "_pixelplayer._tcp"
     private val SERVICE_NAME = "PixelPlayer_${android.os.Build.MODEL}"
@@ -134,7 +140,7 @@ class LANDiscoveryService : Service() {
                 songMetadata.add(SyncSongMetadata(
                     id = song.id.toString(),
                     title = song.title,
-                    artist = song.artistName,
+                    artist = song.artist,
                     fileHash = hash,
                     lastModified = lastMod
                 ))
