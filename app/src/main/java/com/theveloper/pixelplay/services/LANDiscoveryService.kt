@@ -7,14 +7,10 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.IBinder
 import android.util.Log
-import com.theveloper.pixelplay.data.model.Playlist
-import com.theveloper.pixelplay.data.model.SyncData
-import com.theveloper.pixelplay.data.model.SyncPlaylistMetadata
-import com.theveloper.pixelplay.data.model.SyncSongMetadata
-import com.theveloper.pixelplay.data.preferences.UserPreferencesRepository
-import com.theveloper.pixelplay.data.repository.MusicRepository
-import com.theveloper.pixelplay.utils.FileUtils
-import dagger.hilt.android.AndroidEntryPoint
+import android.media.MediaMetadataRetriever
+import com.theveloper.pixelplay.data.database.AlbumEntity
+import com.theveloper.pixelplay.data.database.ArtistEntity
+import com.theveloper.pixelplay.data.database.SongEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -224,11 +220,57 @@ class LANDiscoveryService : Service() {
                         body.byteStream().copyTo(out)
                     }
                     Log.d("LANDiscoveryService", "Downloaded ${meta.title}")
-                    // TODO: Add to DB
+
+                    // Extract metadata and add to DB
+                    addDownloadedSongToDb(file, meta)
                 }
             }
         } catch (e: Exception) {
             Log.e("LANDiscoveryService", "Failed to download ${meta.title}", e)
         }
+    }
+
+    private suspend fun addDownloadedSongToDb(file: IoFile, meta: SyncSongMetadata) {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(file.absolutePath)
+        val title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: meta.title
+        val artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: meta.artist
+        val album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: "Unknown Album"
+        val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0L
+        val year = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)?.toInt() ?: 0
+        val genre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)
+        retriever.release()
+
+        val songId = meta.id.toLongOrNull() ?: meta.fileHash.hashCode().toLong()
+        val artistId = artist.hashCode().toLong()
+        val albumId = (album + artist).hashCode().toLong()
+
+        val songEntity = SongEntity(
+            id = songId,
+            title = title,
+            artistName = artist,
+            albumName = album,
+            path = file.absolutePath,
+            contentUriString = "",
+            albumArtUriString = null,
+            duration = duration,
+            genre = genre,
+            lyrics = null,
+            isFavorite = false,
+            trackNumber = 0,
+            year = year,
+            dateAdded = System.currentTimeMillis(),
+            mimeType = "audio/mpeg",
+            bitrate = null,
+            sampleRate = null,
+            parentDirectoryPath = file.parent
+        )
+
+        val artistEntity = ArtistEntity(id = artistId, name = artist)
+        val albumEntity = AlbumEntity(id = albumId, name = album, artistName = artist, year = year)
+
+        // Insert with REPLACE strategy
+        musicDao.insertMusicData(listOf(songEntity), listOf(albumEntity), listOf(artistEntity))
+        Log.d("LANDiscoveryService", "Added ${title} to DB")
     }
 }
