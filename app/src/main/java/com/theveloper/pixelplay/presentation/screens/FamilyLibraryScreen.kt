@@ -20,13 +20,22 @@ import com.theveloper.pixelplay.presentation.viewmodel.FamilyLibraryViewModel
 // FIX: Added the OptIn annotation to resolve the experimental API warning for TopAppBar/Scaffold
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
+
+
 fun FamilyLibraryScreen(
     onSongClick: (Song) -> Unit,
     onBackClick: () -> Unit
+    
 ) {
     val context = LocalContext.current
     val viewModel = remember { FamilyLibraryViewModel(context) }
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(key1 = true) {
+        Log.d("AppStartupTEST", "0. FamilyLibraryScreen is visible. Triggering fetchFromFamily now.")
+        viewModel.fetchFromFamily()
+    }
 
     Scaffold(
         topBar = {
